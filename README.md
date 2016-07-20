@@ -9,7 +9,7 @@ Remember to branch before testing things out.
 #### Getting started
  - `npm install`
 
-#### Running development environment
- - `make web-dev` (livereloading web server at 8080)
- - `make api`     (livereloading api at 3000)
- - `make styler`  (livereloading styles)
+#### Running environment (each has livereload)
+ - `make web`     (web server at 8080)
+ - `make api`     (api at 3000)
+ - `make styler`  (styles)

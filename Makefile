@@ -1,5 +1,5 @@
-.PHONY: web-dev
-web-dev:
+.PHONY: web
+web:
 	./scripts/start_web_dev.sh
 
 .PHONY: api
