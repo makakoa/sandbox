@@ -1,14 +1,17 @@
 'use strict';
 
 // RUST: Framework + React + o2
+// Source taken from flybox
 
 var React = require('react'),
+    ReactDOMServer = require('react-dom/server'),
     expose = require('util/exposer')(module.exports),
     _ = require('lodash');
 
 expose({
   class: React.createClass,
-  element: React.createElement
+  element: React.createElement,
+  renderMarkup: ReactDOMServer.renderToStaticMarkup
 });
 
 expose(o2);
@@ -17,7 +20,7 @@ function o2(structure) {
   if (_.isArray(tag)) return o2(_.flatten(['list', structure]));
   _.each(_.tail(structure), function(item) {
     if (_.isArray(item)) return children.push(o2(item));
-    if (_.isPlainObject(item)) return _.extend(props, item);
+    if (_.isPlainObject(item) && !item.$$typeof) return _.extend(props, item);
     children.push(item);
   });
   return React.createElement.apply(null, _.flatten([tag, props, children]));
@@ -25,6 +28,5 @@ function o2(structure) {
 
 expose(list);
 function list(tag, arr) {
-  arr.unshift(tag);
-  return arr;
+  return _.flatten([[tag], arr]);
 }

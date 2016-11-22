@@ -3,24 +3,28 @@
 var _ = require('lodash'),
     webpack = require('webpack');
 
-console.log('-Running Sanbox-');
+var $ = process.env;
+
+var debug = $.NODE_ENV !== 'production';
+if (debug) console.log('-Running dev build-');
 
 module.exports = {
   devServer: {
     contentBase: 'app/public',
+    historyApiFallback: true,
     hot: true
   },
   context: __dirname,
   node: {
     process: true
   },
-  devtool: 'inline-sourcemap',
-  entry: [
+  devtool: debug ? 'inline-sourcemap' : null,
+  entry: debug ? [
     './app/public/stylesheet.css',
     './app/index.js',
     'webpack/hot/dev-server',
     'webpack-dev-server/client?http://localhost:8080'
-  ],
+  ] : './app/index.js',
   output: {
     path: './app/public',
     publicPath: '/',
