@@ -9,6 +9,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "aframe": "^0.3.2",
+    "aframe-react": "^3.4.0",
     "babel-core": "^6.10.4",
     "babel-loader": "^6.2.4",
     "babel-preset-react": "^6.11.1",
