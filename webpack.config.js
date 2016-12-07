@@ -44,7 +44,9 @@ module.exports = {
       {
         test: /\.jsx?$/,
         exclude: /node_modules/,
-        loaders: ['react-hot', 'babel?presets[]=react']
+        loaders: debug
+          ? ['react-hot-loader/webpack', 'babel?presets[]=react']
+          : ['babel?presets[]=react']
       },
       [{
         test: /\.json$/,
