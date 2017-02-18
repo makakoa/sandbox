@@ -5,8 +5,8 @@ var _ = require('lodash'),
 
 var $ = process.env;
 
-var debug = $.NODE_ENV !== 'production';
-if (debug) console.log('-Running dev build-');
+var env = $.NODE_ENV || 'development';
+console.log('Webpack:', env);
 
 module.exports = {
   devServer: {
@@ -18,44 +18,63 @@ module.exports = {
   node: {
     process: true
   },
-  devtool: debug ? 'inline-sourcemap' : null,
-  entry: debug ? [
-    './app/public/stylesheet.css',
-    './app/index.js',
-    'webpack/hot/dev-server',
-    'webpack-dev-server/client?http://localhost:8080'
-  ] : './app/index.js',
+  devtool: {
+    development: 'inline-sourcemap',
+    production: null,
+    test: 'inline-sourcemap'
+  }[env],
+  entry: {
+    development: [
+      'react-hot-loader/patch',
+      'webpack-dev-server/client?http://localhost:8080',
+      'webpack/hot/only-dev-server',
+      './app/public/stylesheet.css',
+      './app/index.js'
+    ],
+    production: './app/index.js',
+    test: './app/index.js'
+  }[env],
   output: {
-    path: './app/public',
+    path: env === 'test' ? './app/test_public' : './app/public',
     publicPath: '/',
     filename: 'scripts.min.js'
   },
   module: {
-    preLoaders: [{
-      test:    /\.js$/,
-      exclude: /node_modules/,
-      loader: 'jshint-loader'
-    }, {
-      test:    /\.js$/,
-      exclude: /node_modules/,
-      loader: 'jscs-loader'
-    }],
+    preLoaders: {
+      development: [{
+        test:    /\.js$/,
+        exclude: /node_modules/,
+        loader: 'jshint-loader'
+      }, {
+        test:    /\.js$/,
+        exclude: /node_modules/,
+        loader: 'jscs-loader'
+      }],
+      production: [],
+      test: []
+    }[env],
     loaders: _.flatten([
       {
         test: /\.jsx?$/,
         exclude: /node_modules/,
-        loaders: debug
-          ? ['react-hot-loader/webpack', 'babel?presets[]=react']
-          : ['babel?presets[]=react']
+        loaders: {
+          development: ['react-hot-loader/webpack', 'babel?presets[]=react'],
+          production: ['babel?presets[]=react'],
+          test: ['babel?presets[]=react']
+        }[env]
       },
       [{
         test: /\.json$/,
         loader: 'json'
       }],
-      [{
-        test:   /\.css$/,
-        loader: 'style-loader!css-loader'
-      }]
+      {
+        development: [{
+          test:   /\.css$/,
+          loader: 'style-loader!css-loader'
+        }],
+        production: [],
+        test: []
+      }[env]
     ])
   },
   resolve: {
@@ -63,10 +82,20 @@ module.exports = {
     modulesDirectories: [
       'node_modules',
       'app',
+      'app/src',
       'lib'
     ]
   },
-  plugins: [
-    new webpack.HotModuleReplacementPlugin()
-  ]
+  plugins: {
+    development: [new webpack.HotModuleReplacementPlugin()],
+    production: [
+      new webpack.DefinePlugin({'process.env': JSON.stringify(appVars)}),
+      new webpack.optimize.UglifyJsPlugin({mangle: false}),
+      new webpack.optimize.OccurenceOrderPlugin(),
+      new webpack.optimize.DedupePlugin()
+    ],
+    test: [
+      new webpack.DefinePlugin({'process.env': JSON.stringify(appVars)})
+    ]
+  }[env]
 };
